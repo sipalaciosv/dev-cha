@@ -59,9 +59,12 @@ const toggleStatus = (player: any) => {
           <button @click="prevLevel" class="px-3 py-1 bg-gray-800 rounded hover:bg-gray-700">&lt;</button>
           <div class="text-center">
             <span class="block text-xs text-gray-500">NIVEL</span>
-            <span class="text-3xl font-bold">{{ currentLevel }}</span>
+            <span class="text-3xl font-bold">{{ currentLevel > 8 ? 'FIN' : currentLevel }}</span>
           </div>
-          <button @click="nextLevel" class="px-3 py-1 bg-squid-pink rounded hover:bg-pink-600 font-bold">&gt;</button>
+          <button @click="nextLevel" class="px-3 py-1 rounded font-bold"
+            :class="currentLevel === 8 ? 'bg-red-600 hover:bg-red-500 animate-pulse' : 'bg-squid-pink hover:bg-pink-600'">
+            {{ currentLevel === 8 ? 'FINALIZAR JUEGO' : '&gt;' }}
+          </button>
         </div>
 
         <div class="flex flex-col">

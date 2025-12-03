@@ -36,6 +36,15 @@ export const useGameStore = defineStore('game', () => {
                 joinedAt: serverTimestamp()
             })
 
+            // Manually set player state immediately to avoid race condition
+            player.value = {
+                id: codeUpper,
+                name,
+                status: 'ALIVE',
+                joinedAt: new Date(), // Temporary, will be overwritten by snapshot
+                ...playerDoc.data()
+            }
+
             // Start Listeners
             if (playerUnsubscribe) playerUnsubscribe()
             playerUnsubscribe = onSnapshot(playerRef, (doc) => {
