@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { db, auth } from '../firebase'
-import { doc, setDoc, writeBatch, collection } from 'firebase/firestore'
+import { doc, writeBatch } from 'firebase/firestore'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 
 const adminEmail = ref('')
