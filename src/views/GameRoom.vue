@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useGameStore } from '../stores/gameStore'
 
@@ -7,6 +7,12 @@ const router = useRouter()
 const gameStore = useGameStore()
 const answer = ref('')
 const submitting = ref(false)
+const showWinnerContent = ref(false)
+const showSuspense = ref(false)
+
+// Audio refs
+const heartbeatAudio = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_787553f930.mp3') // Heartbeat sound
+const victoryAudio = new Audio('https://cdn.pixabay.com/audio/2021/08/04/audio_12b0c7443c.mp3') // Epic cinematic hit
 
 onMounted(() => {
   if (!gameStore.player) {
@@ -20,6 +26,28 @@ const hasAnswered = computed(() => {
   const answers = gameStore.player?.answers || {}
   return !!answers[`level_${currentLevel.value}`]
 })
+
+const isWinner = computed(() => playerStatus.value === 'WINNER' || (currentLevel.value > 8 && playerStatus.value === 'ALIVE'))
+
+// Watch for winner state to trigger suspense
+watch(isWinner, (newVal) => {
+  if (newVal) {
+    triggerSuspenseSequence()
+  }
+})
+
+const triggerSuspenseSequence = () => {
+  showSuspense.value = true
+  heartbeatAudio.loop = true
+  heartbeatAudio.play().catch(e => console.log("Audio play failed", e))
+
+  setTimeout(() => {
+    heartbeatAudio.pause()
+    victoryAudio.play().catch(e => console.log("Audio play failed", e))
+    showSuspense.value = false
+    showWinnerContent.value = true
+  }, 4000) // 4 seconds of suspense
+}
 
 const handleSubmit = async () => {
   if (!answer.value) return
@@ -44,20 +72,36 @@ const handleSubmit = async () => {
       <p class="mt-8 text-2xl uppercase tracking-widest">Jugador {{ gameStore.player?.id }}</p>
     </div>
 
+    <!-- SUSPENSE SCREEN -->
+    <div v-if="showSuspense" class="absolute inset-0 z-[60] bg-black flex flex-col items-center justify-center">
+      <div class="w-32 h-32 bg-red-600 rounded-full animate-pulse shadow-[0_0_50px_rgba(220,38,38,0.8)]"></div>
+      <p class="mt-8 text-gray-500 tracking-[1em] text-xs animate-pulse">VERIFICANDO...</p>
+    </div>
+
     <!-- WINNER SCREEN -->
-    <div v-if="playerStatus === 'WINNER' || (currentLevel > 8 && playerStatus === 'ALIVE')"
+    <div v-if="showWinnerContent"
       class="absolute inset-0 z-50 bg-squid-green flex flex-col items-center justify-center text-black overflow-hidden">
-      <!-- Falling Money Animation (CSS only for simplicity) -->
-      <div class="absolute inset-0 opacity-20 pointer-events-none"
-        style="background-image: url('data:image/svg+xml;utf8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22black%22%3E%3Cpath d=%22M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.39-2.1 1.39-1.6 0-2.23-.72-2.32-1.64H8.04c.1 1.7 1.36 2.66 2.86 2.97V19h2.34v-1.67c1.52-.29 2.72-1.16 2.73-2.77-.01-2.2-1.9-2.96-3.66-3.42z%22/%3E%3C/svg%3E'); background-size: 100px;">
+      <!-- Money Rain -->
+      <div class="money-rain absolute inset-0 pointer-events-none">
+        <div v-for="n in 50" :key="n" class="bill" :style="{
+          left: Math.random() * 100 + '%',
+          animationDelay: Math.random() * 5 + 's',
+          animationDuration: (Math.random() * 2 + 3) + 's'
+        }">
+          💵
+        </div>
       </div>
 
-      <h1 class="text-6xl md:text-8xl font-black tracking-tighter mb-4 text-center uppercase drop-shadow-lg">¡GANASTE!
-      </h1>
-      <div class="text-9xl animate-bounce">🐖💰</div>
-      <p class="mt-8 text-2xl md:text-4xl uppercase tracking-widest font-bold">Jugador {{
-        gameStore.player?.id?.split('-')[1] }}</p>
-      <p class="mt-4 text-xl">Has sobrevivido a los 8 niveles.</p>
+      <div class="z-10 text-center animate-scale-in">
+        <h1
+          class="text-6xl md:text-9xl font-black tracking-tighter mb-4 text-center uppercase drop-shadow-2xl text-white stroke-black">
+          ¡GANASTE!</h1>
+        <div class="text-9xl animate-bounce mt-8">🐖</div>
+        <p
+          class="mt-8 text-2xl md:text-4xl uppercase tracking-widest font-bold bg-black text-squid-pink px-6 py-2 inline-block rounded">
+          Jugador {{ gameStore.player?.id?.split('-')[1] }}</p>
+        <p class="mt-6 text-xl font-bold">45.6 MIL MILLONES DE WON</p>
+      </div>
     </div>
 
     <!-- GAME UI -->
@@ -136,6 +180,10 @@ const handleSubmit = async () => {
   animation: slideUp 0.5s ease-out;
 }
 
+.animate-scale-in {
+  animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -155,6 +203,36 @@ const handleSubmit = async () => {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.bill {
+  position: absolute;
+  top: -50px;
+  font-size: 40px;
+  animation: fall linear infinite;
+  opacity: 0.8;
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(-50px) rotate(0deg);
+  }
+
+  100% {
+    transform: translateY(110vh) rotate(360deg);
   }
 }
 </style>
