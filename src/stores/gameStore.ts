@@ -10,7 +10,8 @@ export const useGameStore = defineStore('game', () => {
     const isAdmin = ref(false)
     const gameState = ref({
         currentLevel: 1,
-        isLevelActive: true
+        isLevelActive: true,
+        isLevelLocked: false
     })
 
     let playerUnsubscribe: (() => void) | null = null
@@ -76,7 +77,12 @@ export const useGameStore = defineStore('game', () => {
         if (gameUnsubscribe) return
         gameUnsubscribe = onSnapshot(doc(db, 'game_state', 'global'), (doc) => {
             if (doc.exists()) {
-                gameState.value = doc.data() as any
+                gameState.value = {
+                    currentLevel: 1,
+                    isLevelActive: true,
+                    isLevelLocked: false,
+                    ...doc.data()
+                } as any
             }
         })
     }
@@ -109,10 +115,21 @@ export const useGameStore = defineStore('game', () => {
         try {
             await setDoc(doc(db, 'game_state', 'global'), {
                 currentLevel: level,
-                isLevelActive: true
+                isLevelActive: true,
+                isLevelLocked: false
             }, { merge: true })
         } catch (e) {
             console.error("Set Level Error", e)
+        }
+    }
+
+    const toggleLevelLock = async (locked: boolean) => {
+        try {
+            await updateDoc(doc(db, 'game_state', 'global'), {
+                isLevelLocked: locked
+            })
+        } catch (e) {
+            console.error("Toggle Lock Error", e)
         }
     }
 
@@ -146,6 +163,7 @@ export const useGameStore = defineStore('game', () => {
         submitAnswer,
         setLevel,
         eliminatePlayer,
-        revivePlayer
+        revivePlayer,
+        toggleLevelLock
     }
 })

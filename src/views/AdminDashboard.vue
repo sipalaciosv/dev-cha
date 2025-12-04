@@ -67,6 +67,13 @@ const toggleStatus = (player: any) => {
           </button>
         </div>
 
+        <!-- Lock Control -->
+        <button @click="gameStore.toggleLevelLock(!gameStore.gameState.isLevelLocked)"
+          class="px-4 py-2 rounded font-bold uppercase tracking-wider transition-all flex items-center gap-2"
+          :class="gameStore.gameState.isLevelLocked ? 'bg-red-600 hover:bg-red-500 animate-pulse' : 'bg-green-600 hover:bg-green-500'">
+          <span>{{ gameStore.gameState.isLevelLocked ? '🔒 BLOQUEADO' : '🔓 ABIERTO' }}</span>
+        </button>
+
         <div class="flex flex-col">
           <label class="text-xs text-gray-500">RESPUESTA CORRECTA</label>
           <input v-model="correctAnswer" type="text"

@@ -21,6 +21,7 @@ onMounted(() => {
 })
 
 const currentLevel = computed(() => gameStore.gameState.currentLevel)
+const isLevelLocked = computed(() => gameStore.gameState.isLevelLocked)
 const playerStatus = computed(() => gameStore.player?.status || 'ALIVE')
 const hasAnswered = computed(() => {
   const answers = gameStore.player?.answers || {}
@@ -101,6 +102,19 @@ const handleSubmit = async () => {
           class="mt-8 text-2xl md:text-4xl uppercase tracking-widest font-bold bg-black text-squid-pink px-6 py-2 inline-block rounded">
           Jugador {{ gameStore.player?.id?.split('-')[1] }}</p>
         <p class="mt-6 text-xl font-bold">45.6 MIL MILLONES DE WON</p>
+      </div>
+    </div>
+
+    <!-- TIME'S UP SCREEN -->
+    <div v-else-if="isLevelLocked && !hasAnswered"
+      class="absolute inset-0 z-50 bg-black flex flex-col items-center justify-center text-white">
+      <div class="text-9xl mb-8 animate-pulse">⏳</div>
+      <h1 class="text-6xl font-black tracking-tighter mb-4 text-red-600 uppercase">TIEMPO AGOTADO</h1>
+      <p class="text-2xl text-gray-400 uppercase tracking-widest text-center max-w-lg px-4">
+        No enviaste tu respuesta a tiempo.
+      </p>
+      <div class="mt-12 p-4 border border-red-900 bg-red-900/20 rounded">
+        <p class="text-red-500 text-sm">ESPERA INSTRUCCIONES</p>
       </div>
     </div>
 
