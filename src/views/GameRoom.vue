@@ -166,7 +166,7 @@ const handleSubmit = async () => {
 
             <textarea v-model="answer" rows="4"
               class="w-full bg-gray-900 border border-gray-600 rounded-lg p-4 text-white text-lg focus:border-squid-pink focus:ring-1 focus:ring-squid-pink focus:outline-none transition-all mb-6 font-mono"
-              placeholder="SELECT * FROM..."></textarea>
+              placeholder=""></textarea>
 
             <button @click="handleSubmit" :disabled="!answer || submitting"
               class="w-full bg-squid-pink hover:bg-pink-600 text-white font-bold py-4 rounded transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
