@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { db, auth } from '../firebase'
 import { doc, setDoc, getDoc, onSnapshot, updateDoc, serverTimestamp, collection } from 'firebase/firestore'
 import { signInWithEmailAndPassword } from 'firebase/auth'
@@ -12,6 +12,21 @@ export const useGameStore = defineStore('game', () => {
         currentLevel: 1,
         isLevelActive: true,
         isLevelLocked: false
+    })
+
+    const levels = [
+        { id: 1, question: 'Listar todos los juegos ordenados alfabeticamente (de A a Z). RESPONDER "DIFICULTAD" DE LA FILA 6', answer: 'baja' },
+        { id: 2, question: 'Listar todos los jugadores entre 30 y 50 años, ordenados por orden de registro descendente. RESPONDER "EDAD" DE LA FILA 5', answer: '32' },
+        { id: 3, question: 'Alianzas que se formaron el día 18 de enero del 2024 y no se han disuelto. RESPONDER "NOMBRE_ALIANZA" DE LA FILA 1', answer: 'familia primero' },
+        { id: 4, question: 'El vicio que más se repite entre los jugadores. RESPONDER "VICIO" DE LA FILA 1', answer: 'Procastinar' },
+        { id: 5, question: 'Total de pagos realizados por cada uno de los jugadores, indicando su acreedor, ordenado por el total pagado de mayor a menor. RESPONDER "ACREEDOR" DE LA FILA 1', answer: 'Prestamistas Colombianos' },
+        { id: 6, question: 'Jugadores que sobrevivieron al tercer juego, ordenado por puntaje de desempeño de mayor a menor. RESPONDER "APELLIDO" DE LA FILA 3', answer: 'Silva' },
+        { id: 7, question: 'Jugadores vivos con alianzas activas y deuda mayor al promedio. RESPONDER "NOMBRE_ALIANZA" DE LA FILA 2', answer: 'Alianza del norte' },
+        { id: 8, question: 'Listado de participaciones con su respectivo estado (favorable o desfavorable) agrupados por vicio detallando: total de participaciones, total de supervivencias, total de eliminaciones y si el vicio tuvo un rendimiento favorable o desfavorable (supervivencia mayor a eliminaciones es un rendimiento favorable, supervivencia menor a eliminaciones es un rendimiento desfavorable); RESPONDER "VICIO" Y "BALANCE" DE LA FILA 4', answer: 'Impulsivo y Favorable' },
+    ]
+
+    const currentLevelData = computed(() => {
+        return levels.find(l => l.id === gameState.value.currentLevel) || { question: 'Esperando...', answer: '' }
     })
 
     let playerUnsubscribe: (() => void) | null = null
@@ -164,6 +179,8 @@ export const useGameStore = defineStore('game', () => {
         setLevel,
         eliminatePlayer,
         revivePlayer,
-        toggleLevelLock
+        toggleLevelLock,
+        levels,
+        currentLevelData
     }
 })

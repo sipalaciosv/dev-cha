@@ -1,9 +1,18 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useGameStore } from '../stores/gameStore'
 
 const gameStore = useGameStore()
+
+// Editable correct answer
 const correctAnswer = ref('')
+
+// Update local correct answer when level changes, but allow manual edits
+watch(() => gameStore.currentLevelData, (newVal) => {
+  if (newVal) {
+    correctAnswer.value = newVal.answer
+  }
+}, { immediate: true })
 
 const currentLevel = computed(() => gameStore.gameState.currentLevel)
 const players = computed(() => gameStore.allPlayers)
@@ -11,7 +20,6 @@ const players = computed(() => gameStore.allPlayers)
 const nextLevel = () => {
   if (confirm('¿Estás seguro de avanzar al siguiente nivel?')) {
     gameStore.setLevel(currentLevel.value + 1)
-    correctAnswer.value = ''
   }
 }
 
@@ -41,6 +49,9 @@ const toggleStatus = (player: any) => {
     gameStore.revivePlayer(player.id)
   }
 }
+
+// Update local correct answer when level changes
+// watch already defined above
 </script>
 
 <template>
@@ -77,9 +88,17 @@ const toggleStatus = (player: any) => {
         <div class="flex flex-col">
           <label class="text-xs text-gray-500">RESPUESTA CORRECTA</label>
           <input v-model="correctAnswer" type="text"
-            class="bg-black border border-gray-600 p-2 rounded text-squid-green font-bold w-32 focus:border-squid-green outline-none"
+            class="bg-black border border-gray-600 p-2 rounded text-squid-green font-bold w-48 focus:border-squid-green outline-none"
             placeholder="Set Answer" />
         </div>
+      </div>
+
+      <!-- Current Level Info -->
+      <div v-if="gameStore.currentLevelData" class="mt-4 p-4 bg-gray-800 rounded border border-gray-700">
+        <p class="text-xs text-squid-pink uppercase tracking-widest mb-1">Pregunta Actual</p>
+        <p class="text-lg font-bold text-white">{{ gameStore.currentLevelData.question }}</p>
+        <p class="text-xs text-gray-500 mt-2">Respuesta Esperada: <span class="text-squid-green">{{
+          gameStore.currentLevelData.answer }}</span></p>
       </div>
     </header>
 

@@ -160,6 +160,13 @@ const handleSubmit = async () => {
         <!-- Input State -->
         <div v-else class="w-full animate-slide-up">
           <div class="bg-squid-card p-8 rounded-xl border border-gray-700 shadow-2xl">
+            <div class="mb-6 p-4 bg-gray-800 rounded border border-gray-600">
+              <h3 class="text-xs text-squid-pink uppercase tracking-widest mb-2 font-bold">Consigna</h3>
+              <p class="text-xl text-white font-bold leading-relaxed">
+                {{ gameStore.currentLevelData.question }}
+              </p>
+            </div>
+
             <label class="block text-sm text-squid-pink mb-4 uppercase tracking-widest font-bold">
               Ingresa tu respuesta
             </label>
